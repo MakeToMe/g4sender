@@ -41,16 +41,24 @@ export function UploadContactsDialog({ children }: UploadContactsDialogProps) {
         formData.append('file', file)
         formData.append('list_name', listName)
 
-        const result = await uploadContacts(formData)
+        try {
+            const result = await uploadContacts(formData)
 
-        if (result.error) {
-            console.error(result.error)
-            // TODO: Show error toast
-        } else {
-            console.log("Upload successful")
-            setOpen(false)
-            setFile(null)
-            setListName("")
+            if (result.error) {
+                console.error(result.error)
+                alert(result.error) // Using alert for now as requested/simple
+            } else {
+                console.log("Upload successful", result)
+                setOpen(false)
+                setFile(null)
+                setListName("")
+                // Router refresh is handled in the server action via revalidatePath, 
+                // but client might need a nudge if we were using client cache, 
+                // strict revalidatePath should be enough.
+            }
+        } catch (error) {
+            console.error("Unexpected error", error)
+            alert("Ocorreu um erro inesperado.")
         }
 
         setIsLoading(false)
