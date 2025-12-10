@@ -1,7 +1,13 @@
+
 import { getCampaigns } from "@/app/actions/campaigns"
+import { getStorageFiles } from "@/app/actions/storage"
+import { getContactLists } from "@/app/actions/contacts"
+import { getInstances } from "@/app/actions/instances"
 import { EmptyState } from "@/components/empty-state"
-import { MessageSquarePlus, Megaphone, ImageIcon, Video, FileText, Music, Eye } from "lucide-react"
+import { MessageSquarePlus, Megaphone, ImageIcon, Video, FileText, Music, Eye, Trash2, TriangleAlert } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { CampaignDialog } from "@/components/campaign-dialog"
+import { TriggerCampaignDialog } from "@/components/trigger-campaign-dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -15,13 +21,31 @@ import {
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { DeleteCampaignDialog } from "@/components/delete-campaign-dialog"
-import { Trash2 } from "lucide-react"
+
 
 export default async function CampaignsPage() {
     const campaigns = await getCampaigns()
+    const lists = await getContactLists()
+    const instances = await getInstances()
+
+    // Calculate total storage usage
+    const files = await getStorageFiles()
+    const totalBytes = files.reduce((acc, file) => acc + file.size, 0)
+    const MAX_STORAGE_BYTES = 200 * 1024 * 1024 // 200MB
+    const isStorageFull = totalBytes >= MAX_STORAGE_BYTES
 
     return (
         <div className="h-full flex-1 flex-col space-y-8 p-8 flex">
+            {isStorageFull && (
+                <Alert variant="destructive">
+                    <TriangleAlert className="h-4 w-4" />
+                    <AlertTitle>Limite de Armazenamento Atingido</AlertTitle>
+                    <AlertDescription>
+                        Seu armazenamento excedeu 200MB. Você precisa apagar algumas campanhas ou mídias para liberar espaço antes de criar novas campanhas.
+                    </AlertDescription>
+                </Alert>
+            )}
+
             <div className="flex items-center justify-between space-y-2">
                 <div>
                     <h2 className="text-2xl font-bold tracking-tight">Campanhas</h2>
@@ -30,7 +54,12 @@ export default async function CampaignsPage() {
                     </p>
                 </div>
                 {campaigns.length > 0 && (
-                    <CampaignDialog />
+                    <div className="flex gap-2">
+                        <TriggerCampaignDialog campaigns={campaigns} lists={lists} instances={instances} />
+                        <div className={isStorageFull ? "opacity-50 pointer-events-none" : ""}>
+                            <CampaignDialog />
+                        </div>
+                    </div>
                 )}
             </div>
 
@@ -40,12 +69,14 @@ export default async function CampaignsPage() {
                     title="Nenhuma campanha criada"
                     description="Crie sua primeira campanha para começar a disparar mensagens."
                 >
-                    <CampaignDialog>
-                        <Button className="mt-4">
-                            <MessageSquarePlus className="mr-2 h-4 w-4" />
-                            Criar Campanha
-                        </Button>
-                    </CampaignDialog>
+                    <div className={isStorageFull ? "opacity-50 pointer-events-none" : ""}>
+                        <CampaignDialog>
+                            <Button className="mt-4" disabled={isStorageFull}>
+                                <MessageSquarePlus className="mr-2 h-4 w-4" />
+                                Criar Campanha
+                            </Button>
+                        </CampaignDialog>
+                    </div>
                 </EmptyState>
             ) : (
                 <div className="border rounded-md">

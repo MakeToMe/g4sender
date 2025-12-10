@@ -26,14 +26,19 @@ export function DeleteCampaignDialog({ children, campaignId }: DeleteCampaignDia
 
     const handleDelete = async () => {
         setIsLoading(true)
-        const result = await deleteCampaign(campaignId)
+        try {
+            const result = await deleteCampaign(campaignId)
 
-        if (result.error) {
-            toast.error(result.error)
-            setIsLoading(false)
-        } else {
-            toast.success("Campanha excluída com sucesso!")
-            setOpen(false)
+            if (result.error) {
+                toast.error(result.error)
+            } else {
+                toast.success("Campanha excluída com sucesso!")
+                setOpen(false)
+            }
+        } catch (error) {
+            console.error("Client delete error:", error)
+            toast.error("Erro inesperado ao excluir campanha. Verifique o console.")
+        } finally {
             setIsLoading(false)
         }
     }

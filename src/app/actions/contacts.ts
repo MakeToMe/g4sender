@@ -163,3 +163,19 @@ export async function uploadContacts(formData: FormData) {
         return { error: 'Falha ao enviar arquivo para processamento.' }
     }
 }
+
+export async function getContactListCount(listId: string) {
+    const supabase = await createClient()
+
+    const { count, error } = await supabase
+        .from('camp_contacts')
+        .select('*', { count: 'exact', head: true })
+        .eq('list_id', listId)
+
+    if (error) {
+        console.error('Error counting contacts:', error)
+        return 0
+    }
+
+    return count || 0
+}

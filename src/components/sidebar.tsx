@@ -11,6 +11,7 @@ import {
     Megaphone,
     MessageSquare,
     Settings,
+    Database,
 } from "lucide-react"
 
 const routes = [
@@ -43,6 +44,12 @@ const routes = [
         icon: MessageSquare,
         href: "/conversations",
         color: "text-emerald-500",
+    },
+    {
+        label: "Storage",
+        icon: Database,
+        href: "/storage",
+        color: "text-indigo-500",
     },
     {
         label: "Settings",

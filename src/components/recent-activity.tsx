@@ -1,77 +1,53 @@
+"use client"
+
 import {
     Avatar,
     AvatarFallback,
     AvatarImage,
 } from "@/components/ui/avatar"
+import { RecentActivityItem } from "@/app/actions/dashboard"
+import { CheckCheck, Check, Clock, Eye } from "lucide-react"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
 
-export function RecentActivity() {
+interface RecentActivityProps {
+    data: RecentActivityItem[]
+}
+
+export function RecentActivity({ data }: RecentActivityProps) {
+    if (!data || data.length === 0) {
+        return (
+            <div className="flex h-[350px] items-center justify-center text-muted-foreground">
+                Nenhuma atividade recente.
+            </div>
+        )
+    }
+
     return (
         <div className="space-y-8">
-            <div className="flex items-center">
-                <Avatar className="h-9 w-9">
-                    <AvatarImage src="/avatars/01.png" alt="Avatar" />
-                    <AvatarFallback>OM</AvatarFallback>
-                </Avatar>
-                <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">Campanha "Black Friday"</p>
-                    <p className="text-sm text-muted-foreground">
-                        Enviada para 1.200 contatos
-                    </p>
+            {data.map((item) => (
+                <div key={item.id} className="flex items-center">
+                    <Avatar className="h-9 w-9">
+                        <AvatarFallback>
+                            {item.contact_name.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="ml-4 space-y-1">
+                        <p className="text-sm font-medium leading-none">{item.contact_name}</p>
+                        <p className="text-xs text-muted-foreground">
+                            {item.contact_phone}
+                        </p>
+                    </div>
+                    <div className="ml-auto flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">
+                            {format(new Date(item.timestamp), "HH:mm", { locale: ptBR })}
+                        </span>
+                        {item.status === 'read' && <Eye className="h-4 w-4 text-purple-500" title="Lida" />}
+                        {item.status === 'delivered' && <CheckCheck className="h-4 w-4 text-green-500" title="Entregue" />}
+                        {item.status === 'sent' && <Check className="h-4 w-4 text-blue-500" title="Enviada" />}
+                    </div>
                 </div>
-                <div className="ml-auto font-medium text-green-500">Concluída</div>
-            </div>
-            <div className="flex items-center">
-                <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-                    <AvatarImage src="/avatars/02.png" alt="Avatar" />
-                    <AvatarFallback>JL</AvatarFallback>
-                </Avatar>
-                <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">Novo Contato</p>
-                    <p className="text-sm text-muted-foreground">
-                        João Lima (11) 99999-9999
-                    </p>
-                </div>
-                <div className="ml-auto font-medium">+1</div>
-            </div>
-            <div className="flex items-center">
-                <Avatar className="h-9 w-9">
-                    <AvatarImage src="/avatars/03.png" alt="Avatar" />
-                    <AvatarFallback>IN</AvatarFallback>
-                </Avatar>
-                <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">Instância Conectada</p>
-                    <p className="text-sm text-muted-foreground">
-                        Marketing WhatsApp 01
-                    </p>
-                </div>
-                <div className="ml-auto font-medium text-blue-500">Online</div>
-            </div>
-            <div className="flex items-center">
-                <Avatar className="h-9 w-9">
-                    <AvatarImage src="/avatars/04.png" alt="Avatar" />
-                    <AvatarFallback>WK</AvatarFallback>
-                </Avatar>
-                <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">Campanha "Promoção Relâmpago"</p>
-                    <p className="text-sm text-muted-foreground">
-                        Agendada para amanhã às 10:00
-                    </p>
-                </div>
-                <div className="ml-auto font-medium text-yellow-500">Agendada</div>
-            </div>
-            <div className="flex items-center">
-                <Avatar className="h-9 w-9">
-                    <AvatarImage src="/avatars/05.png" alt="Avatar" />
-                    <AvatarFallback>SD</AvatarFallback>
-                </Avatar>
-                <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">Mensagem Recebida</p>
-                    <p className="text-sm text-muted-foreground">
-                        Sofia: "Gostaria de saber mais..."
-                    </p>
-                </div>
-                <div className="ml-auto font-medium">Agora</div>
-            </div>
+            ))}
         </div>
     )
 }
